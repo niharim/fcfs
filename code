@@ -1,0 +1,218 @@
+ALGORITHM:
+
+	•	Input the processes along with their burst time (bt).
+	•	Find waiting time (wt) for all processes.
+	•	As first process that comes need not to wait so waiting time for process 1 will be 0 i.e. wt[0] = 0.
+	•	Find waiting time for all other processes i.e. for process i -> wt[i] = bt[i- 1] + wt[i-1] .
+	•	Find turnaround time = waiting_time + burst_time for all processes.
+	•	Find average waiting time = total_waiting_time / no_of_processes.
+	•	Similarly, find average turnaround time = total_turn_around_time / no_of_processes.
+
+
+Code:
+
+#include <stdio.h>  
+#include <string.h> 
+#include <stdlib.h> 
+  
+typedef struct { 
+    char pid[10]; 
+    int bt; 
+    int at; 
+} process; 
+  
+int countDigit(long long n)  
+{  
+    int count = 0;  
+    while (n != 0) {  
+        n = n / 10;  
+        ++count;  
+    }  
+    return count;  
+}  
+  
+  
+char *repeatStr (char *str, size_t count) { 
+    if (count == 0) return NULL; 
+    char *ret = malloc (strlen (str) * count + 1); 
+    if (ret == NULL) return NULL; 
+    strcpy (ret, str); 
+    while (--count > 0) { 
+        strcat (ret, str); 
+    } 
+    return ret; 
+} 
+  
+  
+int arrTime( process p ) 
+{ 
+    return p.at; 
+} 
+  
+int bTime( process p ) 
+{ 
+    return p.bt; 
+} 
+  
+  
+void sort(process p[], int n, int (*key)( process p )) 
+{ 
+  
+    for (int i = 0; i < n-1; i++) 
+    { 
+  
+        process min = p[i]; 
+        int mindex = i; 
+  
+        for (int j = i+1; j < n; j++) 
+        { 
+            if ( (*key)(p[j]) < (*key)(min) ) 
+            { 
+                min = p[j]; 
+                mindex = j; 
+            } 
+        } 
+  
+        process temp = p[i]; 
+        p[i] = p[mindex]; 
+        p[mindex] = temp; 
+  
+    } 
+} 
+  
+  
+typedef struct time 
+{ 
+    int startTime; 
+    int endTime; 
+  
+} time; 
+ 
+int main() 
+{ 
+ 
+    while (1) 
+    { 
+  
+        int wt; 
+        int tt; 
+        int n; 
+        int ft; 
+  
+        printf("Enter no. of processes: "); 
+  
+        scanf("%d", &n); 
+        process p[n]; 
+         int spaces = 10; 
+         for(int i = 0; i < n; i++) 
+        { 
+            printf("\n\nEnter process id, arrival time and burst time seperated by space: ");     
+            scanf("%s %d %d", p[i].pid, &p[i].at, &p[i].bt); 
+  
+        } 
+  
+        printf("FCFS "); 
+         int (*f)( process p); 
+         f = arrTime; 
+        sort( p, n, f ); 
+            time times[n]; 
+            process pOrder[n]; 
+      
+            printf("\n\nPID\t\tArrival Time\t\tBurst Time\t\tWaiting Time\t\tTurn Around Time\n\n"); 
+  
+  
+            wt = 0; 
+            tt = p[0].bt; 
+            ft = p[0].at + tt; 
+            times[0].startTime = 0; 
+            times[0].endTime = ft; 
+  
+            pOrder[0] = p[0]; 
+  
+            int i = 0; 
+            printf("%s\t\t\t%d\t\t\t%d\t\t\t%d\t\t\t%d\n", p[i].pid, p[i].at, p[i].bt, wt, tt); 
+  
+  
+            int avgwt = wt; 
+            int avgtt = tt; 
+  
+            for( i = 1; i < n; i++) 
+            { 
+  
+  
+                //printf("%d\n", i); 
+                pOrder[i] = p[i]; 
+                 
+  
+                 
+                wt = (ft - p[i].at) >= 0 ? (ft - p[i].at) : 0; 
+                tt = wt + p[i].bt; 
+  
+                ft = ft > p[i].at ? ft : p[i].at; 
+             
+                times[i].startTime = ft; 
+                ft += p[i].bt; 
+                times[i].endTime = ft; 
+  
+                avgwt += wt; 
+                avgtt += tt; 
+  
+                printf("%s\t\t\t%d\t\t\t%d\t\t\t%d\t\t\t%d\n", p[i].pid, p[i].at, p[i].bt, wt, tt); 
+  
+  
+            } 
+  
+  
+            char* string = repeatStr( " ----------", n); 
+            strcat(string, " "); 
+  
+            printf("%s\n", string); 
+            printf("|"); 
+             
+            for(int i = 0; i < n; i++ ) 
+            { 
+                printf("%6s    |", pOrder[i].pid); 
+  
+            } 
+            printf("\n"); 
+  
+            printf("%s\n", string); 
+  
+            int time = -1; 
+  
+            for(int i = 0; i < n; i++ ) 
+            { 
+                int spaces = 12  - countDigit(times[i].endTime); 
+                if (time!=-1) 
+                    spaces -= countDigit(time); 
+                else 
+                    spaces -= 2; 
+  
+                if(time != times[i].startTime) 
+                { 
+                    spaces -= countDigit(times[i].startTime); 
+  
+                    printf(" %d", times[i].startTime); 
+                } 
+                while(spaces--) 
+                    printf(" "); 
+                printf("%d", times[i].endTime); 
+  
+                time = times[i].endTime; 
+                 
+  
+            } 
+            printf("\n"); 
+             
+            printf("Average Waiting Time: %.2f\n", avgwt/((float)n)); 
+            printf("Average Turn Around Time: %.2f\n", avgtt/((float)n)); 
+  
+         char c; 
+        printf("Do you want to continue??(Y/N): "); 
+        scanf(" %c", &c); 
+  
+        if( c == 'N' ) 
+            break; 
+  
+    }
+}
